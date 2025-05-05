@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>X و O</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .scoreboard {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #fff;
+      border: 2px solid #000;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cell:hover {
+      background: #eee;
+    }
+
+    .controls {
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    .winner {
+      font-weight: bold;
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>لعبة X و O</h1>
+
+  <div class="scoreboard">
+    X: <span id="scoreX">0</span> | O: <span id="scoreO">0</span>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="winner" id="winnerText"></div>
+
+  <div class="controls">
+    <button onclick="resetBoard()">إعادة الجولة</button>
+    <button onclick="restartGame()">إعادة اللعبة كاملة</button>
+  </div>
+
+  <script>
+    const board = document.getElementById("board");
+    const winnerText = document.getElementById("winnerText");
+    const scoreX = document.getElementById("scoreX");
+    const scoreO = document.getElementById("scoreO");
+
+    let cells = Array(9).fill(null);
+    let currentPlayer = "X";
+    let scores = { X: 0, O: 0 };
+    let gameActive = true;
+
+    function renderBoard() {
+      board.innerHTML = "";
+      cells.forEach((cell, index) => {
+        const div = document.createElement("div");
+        div.classList.add("cell");
+        div.textContent = cell || "";
+        div.addEventListener("click", () => handleCellClick(index));
+        board.appendChild(div);
+      });
+    }
+
+    function handleCellClick(index) {
+      if (!gameActive || cells[index]) return;
+      cells[index] = currentPlayer;
+      renderBoard();
+      if (checkWinner()) {
+        winnerText.textContent = `الفائز: ${currentPlayer}`;
+        scores[currentPlayer]++;
+        updateScores();
+        gameActive = false;
+      } else if (!cells.includes(null)) {
+        winnerText.textContent = "تعادل!";
+        gameActive = false;
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+      }
+    }
+
+    function checkWinner() {
+      const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+      return winPatterns.some(pattern => {
+        const [a, b, c] = pattern;
+        return cells[a] && cells[a] === cells[b] && cells[a] === cells[c];
+      });
+    }
+
+    function updateScores() {
+      scoreX.textContent = scores["X"];
+      scoreO.textContent = scores["O"];
+    }
+
+    function resetBoard() {
+      cells = Array(9).fill(null);
+      gameActive = true;
+      currentPlayer = "X";
+      winnerText.textContent = "";
+      renderBoard();
+    }
+
+    function restartGame() {
+      scores = { X: 0, O: 0 };
+      updateScores();
+      resetBoard();
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
